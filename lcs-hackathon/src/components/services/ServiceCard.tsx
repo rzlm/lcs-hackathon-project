@@ -8,13 +8,6 @@ import type { Service } from '@/types/service';
 import { formatDistance } from '@/utils/distance';
 import { MARKER_HEX, scoreToColor } from '@/utils/scoring';
 
-const AVAILABILITY_TEXT: Record<string, string> = {
-  available: 'Space available',
-  limited: 'Filling up',
-  full: 'At capacity',
-  unknown: 'Check status',
-};
-
 interface ServiceCardProps {
   service: Service;
   onPress: () => void;
@@ -27,15 +20,27 @@ export default function ServiceCard({
   isSelected = false,
 }: ServiceCardProps) {
   const theme = useTheme();
-  const color = MARKER_HEX[scoreToColor(service.availability_score)];
   
-  // Use your helper from distance.ts
+  // --- COLOR LOGIC ---
+  // If score is 0.5 (initial/offline), use a neutral gray. 
+  // Otherwise, use the scoring utility (Green/Orange/Red).
+  const isUnknown = service.availability_score === 0.5;
+  const statusColor = isUnknown ? '#94a3b8' : MARKER_HEX[scoreToColor(service.availability_score)];
+  
   const distanceLabel = service.distance_m != null ? formatDistance(service.distance_m) : null;
 
-  const availabilityText =
-    service.availability_label != null
-      ? AVAILABILITY_TEXT[service.availability_label]
-      : AVAILABILITY_TEXT.unknown;
+  const getStatusText = () => {
+    // If we have a predicted count from FastAPI, use it
+    if (service.predicted_count !== undefined && service.predicted_count > 0) {
+      return `${service.predicted_count} ${service.predicted_count === 1 ? 'bed' : 'beds'} available`;
+    }
+    
+    // If the count is 0 but confirmed by API
+    if (service.availability_label === 'full') return 'Currently full';
+
+    // While loading or if API fails
+    return 'Checking status...';
+  };
 
   return (
     <TouchableOpacity
@@ -49,8 +54,8 @@ export default function ServiceCard({
         },
       ]}>
       
-      {/* Visual Indicator Stripe */}
-      <View style={[styles.stripe, { backgroundColor: color }]} />
+      {/* Stripe is Gray while loading, then snaps to Green/Orange/Red */}
+      <View style={[styles.stripe, { backgroundColor: statusColor }]} />
 
       <View style={styles.body}>
         <View style={styles.topRow}>
@@ -71,16 +76,9 @@ export default function ServiceCard({
             </Text>
           </View>
           
-          <Text style={[styles.availability, { color }]}>
-            {availabilityText}
+          <Text style={[styles.availability, { color: statusColor }]}>
+            {getStatusText()}
           </Text>
-
-          {/* Optional: Show predicted bed count if it's a live update */}
-          {service.predicted_count > 0 && (
-            <Text style={[styles.count, { color: theme.textSecondary }]}>
-              • {service.predicted_count} beds
-            </Text>
-          )}
         </View>
 
         {service.address_street != null && (
@@ -97,10 +95,10 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    minHeight: 88, // Slightly taller to feel more spacious
+    minHeight: 88,
   },
   stripe: {
-    width: 6, // Slightly thicker for better visual grouping
+    width: 6,
   },
   body: {
     flex: 1,
@@ -116,7 +114,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: '700', // Bolder for better hierarchy
+    fontWeight: '700',
     flex: 1,
   },
   distance: {
@@ -137,14 +135,11 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
-    textTransform: 'uppercase', // Professional look
+    textTransform: 'uppercase',
   },
   availability: {
     fontSize: 13,
-    fontWeight: '600',
-  },
-  count: {
-    fontSize: 12,
+    fontWeight: '700',
   },
   address: {
     fontSize: 13,
