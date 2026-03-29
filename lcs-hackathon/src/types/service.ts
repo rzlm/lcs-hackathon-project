@@ -20,8 +20,8 @@ export interface Service {
   name: string;
   type: ServiceType;
   description: string | null;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   address_street: string | null;
   phone: string | null;
   website: string | null;

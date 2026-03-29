@@ -2,12 +2,13 @@ import { useLocalSearchParams, Stack } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Spacing } from '@/constants/theme';
+import { TORONTO_CENTER } from '@/hooks/use-location';
 import { useServices } from '@/hooks/use-services';
 import { EMPTY_FILTERS } from '@/types/service';
 
 export default function ServiceDetailScreen() {
   const { id } = useLocalSearchParams();
-  const { services, loading } = useServices(EMPTY_FILTERS);
+  const { services, loading } = useServices(EMPTY_FILTERS, TORONTO_CENTER);
   const service = services.find((s) => s.id === id);
 
   if (!service) return <View style={styles.center}><Text>Shelter Not Found</Text></View>;
@@ -47,7 +48,7 @@ export default function ServiceDetailScreen() {
                     <ActivityIndicator size="small" color="#666" />
                 ) : (
                     <Text style={styles.mainInfo}>
-                        {isLive ? `~${service.predicted_count} Beds Available` : "Connect to Wi-Fi for Live Forecast"}
+                        {isLive ? `${service.availability_label?.toUpperCase()}` : "Connect to Wi-Fi for Live Forecast"}
                     </Text>
                 )}
                 <Text style={styles.disclaimer}>

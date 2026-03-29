@@ -31,6 +31,8 @@ interface ServiceListSheetProps {
   onServicePress: (service: Service) => void;
   sheetState: SheetState;
   onSheetStateChange: (state: SheetState) => void;
+  loading?: boolean;
+  offlineMode?: boolean;
 }
 
 export default function ServiceListSheet({
@@ -39,6 +41,8 @@ export default function ServiceListSheet({
   onServicePress,
   sheetState,
   onSheetStateChange,
+  loading = false,
+  offlineMode = false,
 }: ServiceListSheetProps) {
   const theme = useTheme();
   const { height: H } = useWindowDimensions();
@@ -112,7 +116,14 @@ export default function ServiceListSheet({
           <View style={[styles.handle, { backgroundColor: theme.backgroundSelected }]} />
           <View style={styles.peekRow}>
             <Text style={[styles.count, { color: theme.text }]}>
-              {services.length === 0 ? 'No places nearby' : `${services.length} places nearby`}
+              {loading
+                ? 'Finding places…'
+                : services.length === 0
+                  ? 'No places nearby'
+                  : `${services.length} place${services.length === 1 ? '' : 's'} nearby`}
+              {!loading && offlineMode && (
+                <Text style={{ color: theme.textSecondary, fontWeight: '400', fontSize: 13 }}>{' '}(offline)</Text>
+              )}
             </Text>
             {sheetState !== 'peek' && (
               <TouchableOpacity onPress={() => onSheetStateChange('peek')}>

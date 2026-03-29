@@ -64,8 +64,8 @@ export default function MapView({
       }
     });
 
-    // Add or update markers
-    services.forEach((service) => {
+    // Add or update markers (skip services without coordinates)
+    services.filter((s): s is typeof s & { latitude: number; longitude: number } => s.latitude != null && s.longitude != null).forEach((service) => {
       const color = MARKER_HEX[scoreToColor(service.availability_score)];
       const selected = service.id === selectedId;
       const size = selected ? 22 : 16;

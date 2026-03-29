@@ -30,11 +30,6 @@ export default function ServiceCard({
   const distanceLabel = service.distance_m != null ? formatDistance(service.distance_m) : null;
 
   const getStatusText = () => {
-    // If we have a predicted count from FastAPI, use it
-    if (service.predicted_count !== undefined && service.predicted_count > 0) {
-      return `${service.predicted_count} ${service.predicted_count === 1 ? 'bed' : 'beds'} available`;
-    }
-    
     // If the count is 0 but confirmed by API
     if (service.availability_label === 'full') return 'Currently full';
 

@@ -33,6 +33,7 @@ export const Colors = {
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
     accentGreen: '#8ac28b',
+    accentGreenDark: '#6aa86b',
     statusGreen: '#4CAF50',
     statusRed: '#EF5350',
     statusOrange: '#FFB74D',
