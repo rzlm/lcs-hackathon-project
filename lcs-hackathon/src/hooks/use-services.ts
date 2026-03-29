@@ -5,7 +5,7 @@ import OFFLINE_SHELTERS from '@/assets/data/shelters.json';
 // Import your distance functions
 import { haversineDistance } from '@/utils/distance';
 
-const API_BASE_URL = 'http://0.0.0.0:8000'; 
+const API_BASE_URL = 'https://lcs2026-fastapi.onrender.com'; 
 
 export function useServices(filters: ServiceFilters, location?: { latitude: number; longitude: number }) {
   const [services, setServices] = useState<Service[]>([]);
