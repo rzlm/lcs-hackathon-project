@@ -12,59 +12,83 @@ const API_BASE_URL = 'https://lcs2026-fastapi.onrender.com';
 
 export type DataSource = 'supabase' | 'csv' | null;
 
+// Module-level cache — shared across all hook instances so the detail page
+// gets data instantly after the map screen has already fetched it.
+let cachedServices: Service[] | null = null;
+let cachedSource: DataSource = null;
+let fetchPromise: Promise<void> | null = null;
+
 export function useServices(
   filters: ServiceFilters,
   userLocation: LocationCoords,
 ): { services: Service[]; loading: boolean; error: string | null; source: DataSource } {
-  const [allServices, setAllServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [allServices, setAllServices] = useState<Service[]>(cachedServices ?? []);
+  const [loading, setLoading] = useState(cachedServices === null);
   const [error, setError] = useState<string | null>(null);
-  const [source, setSource] = useState<DataSource>(null);
-  const fetchedRef = useRef(false);
+  const [source, setSource] = useState<DataSource>(cachedSource);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
 
-    fetchShelters()
-      .then(async ({ data, source: src }) => {
-        // Overlay FastAPI forecast predictions on top of base data
-        try {
-          const response = await fetch(`${API_BASE_URL}/forecast?sector=all`);
-          const liveData = await response.json();
+  useEffect(() => {
+    // Cache already populated — nothing to do
+    if (cachedServices !== null) return;
 
-          if (Array.isArray(liveData)) {
-            const merged = data.map((s) => {
-              const liveInfo = liveData.find(
-                (l: { shelter_id: number | string; predicted_beds: number }) =>
-                  s.external_id != null && Number(l.shelter_id) === s.external_id,
-              );
-              if (liveInfo) {
-                const count = liveInfo.predicted_beds;
-                return {
-                  ...s,
-                  availability_score: count > 2 ? 1.0 : count > 0 ? 0.4 : 0.1,
-                  availability_label: (count > 2 ? 'available' : count > 0 ? 'limited' : 'full') as Service['availability_label'],
-                };
-              }
-              return s;
-            });
-            setAllServices(merged);
-          } else {
-            setAllServices(data);
+    // Kick off the fetch only once globally
+    if (!fetchPromise) {
+      fetchPromise = fetchShelters()
+        .then(async ({ data, source: src }) => {
+          let merged = data;
+          try {
+            const response = await fetch(`${API_BASE_URL}/forecast?sector=all`);
+            const liveData = await response.json();
+            if (Array.isArray(liveData)) {
+              merged = data.map((s) => {
+                const liveInfo = liveData.find(
+                  (l: { shelter_id: number | string; predicted_beds: number }) =>
+                    s.external_id != null && Number(l.shelter_id) === s.external_id,
+                );
+                if (liveInfo) {
+                  const count = liveInfo.predicted_beds;
+                  return {
+                    ...s,
+                    availability_score: count > 2 ? 1.0 : count > 0 ? 0.4 : 0.1,
+                    availability_label: (
+                      count > 2 ? 'available' : count > 0 ? 'limited' : 'full'
+                    ) as Service['availability_label'],
+                  };
+                }
+                return s;
+              });
+            }
+          } catch {
+            // FastAPI not reachable — use base data as-is
           }
-        } catch {
-          // FastAPI not reachable — use base data as-is
-          setAllServices(data);
-        }
+          cachedServices = merged;
+          cachedSource = src;
+        })
+        .catch(() => {
+          // leave cache null so next mount retries
+          fetchPromise = null;
+        });
+    }
 
-        setSource(src);
+    // Subscribe to the in-flight fetch
+    fetchPromise.then(() => {
+      if (mountedRef.current && cachedServices) {
+        setAllServices(cachedServices);
+        setSource(cachedSource);
         setLoading(false);
-      })
-      .catch((err: Error) => {
+      }
+    }).catch((err: Error) => {
+      if (mountedRef.current) {
         setError(err.message);
         setLoading(false);
-      });
+      }
+    });
   }, []);
 
   const services = useMemo(() => {

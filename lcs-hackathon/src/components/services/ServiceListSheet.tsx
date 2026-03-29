@@ -49,17 +49,15 @@ export default function ServiceListSheet({
   const listRef = useRef<FlatList>(null);
 
   // --- AUTO-SCROLL TO SELECTED ITEM ---
+  // Delay scroll until after the sheet spring animation (~350ms) completes
   useEffect(() => {
-    if (selectedId && services.length > 0) {
-      const index = services.findIndex((s) => s.id === selectedId);
-      if (index !== -1) {
-        listRef.current?.scrollToIndex({
-          index,
-          animated: true,
-          viewPosition: 0.5, // Centers the item in the visible list
-        });
-      }
-    }
+    if (!selectedId || services.length === 0) return;
+    const index = services.findIndex((s) => s.id === selectedId);
+    if (index === -1) return;
+    const timer = setTimeout(() => {
+      listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0 });
+    }, 380);
+    return () => clearTimeout(timer);
   }, [selectedId, services]);
 
   const SNAP_PEEK = H - PEEK_HEIGHT;

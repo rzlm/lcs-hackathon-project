@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MapView from '@/components/map/MapView';
@@ -29,15 +29,34 @@ export default function MapScreen() {
 
   return (
     <View style={styles.screen}>
-      <MapView
-        services={services}
-        selectedId={selectedId}
-        onMarkerPress={handleMarkerPress}
-        style={StyleSheet.absoluteFill}
-      />
+      {/* Top section: header + search + filters */}
+      <SafeAreaView edges={['top']} style={styles.topSection}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoArea}>
+            {/* Logo placeholder */}
+            <View style={styles.logoPlaceholder} />
+            <Text style={styles.logoText}>
+              <Text style={styles.logoHaven}>Haven</Text>
+              <Text style={styles.logoNow}>Now</Text>
+            </Text>
+          </View>
+          <View style={styles.headerActions}>
+            <View style={styles.liveBadge}>
+              <View style={styles.liveDot} />
+              <Text style={styles.liveText}>Live</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.callBtn}
+              onPress={() => Linking.openURL('tel:211')}
+              activeOpacity={0.85}>
+              <Text style={styles.callBtnText}>📞 211</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
-        <View style={styles.controls} pointerEvents="box-none">
+        {/* Search + Filters */}
+        <View style={styles.controls}>
           <SearchBar
             value={filters.query}
             onChangeText={(q) => setFilters((f) => ({ ...f, query: q }))}
@@ -51,6 +70,17 @@ export default function MapScreen() {
         </View>
       </SafeAreaView>
 
+      {/* Map fills remaining space */}
+      <View style={styles.mapContainer}>
+        <MapView
+          services={services}
+          selectedId={selectedId}
+          onMarkerPress={handleMarkerPress}
+          style={StyleSheet.absoluteFill}
+        />
+      </View>
+
+      {/* Bottom sheet */}
       <ServiceListSheet
         services={services}
         selectedId={selectedId}
@@ -78,8 +108,61 @@ export default function MapScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Palette.background },
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 },
-  controls: { marginTop: Spacing.two, marginHorizontal: Spacing.three, gap: Spacing.two },
+
+  // Top section
+  topSection: { backgroundColor: Palette.background, zIndex: 20 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  logoArea: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  logoPlaceholder: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: Palette.accentGreen,
+  },
+  logoText: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
+  logoHaven: { color: '#B8832A' },
+  logoNow: { color: Palette.accentGreen },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4CAF50' },
+  liveText: { fontSize: 12, fontWeight: '600', color: Palette.text },
+  callBtn: {
+    backgroundColor: '#C0392B',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    shadowColor: '#C0392B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  callBtnText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
+
+  controls: {
+    paddingHorizontal: Spacing.three,
+    paddingBottom: Spacing.two,
+    gap: Spacing.two,
+  },
   loadingToast: {
     alignSelf: 'center',
     backgroundColor: 'rgba(0,0,0,0.6)',
@@ -88,6 +171,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   loadingText: { color: '#FFF', fontSize: 10, fontWeight: '600' },
+
+  // Map
+  mapContainer: { flex: 1 },
+
+  // List button
   listBtn: {
     position: 'absolute',
     bottom: 110,

@@ -40,8 +40,10 @@ export default function ServiceCard({
       style={[
         styles.container,
         {
-          backgroundColor: isSelected ? theme.backgroundSelected : theme.background,
+          backgroundColor: isSelected ? theme.background : '#FDF6E8',
           borderBottomColor: theme.backgroundElement,
+          borderLeftColor: isSelected ? '#B8832A' : 'transparent',
+          borderLeftWidth: 4,
         },
       ]}>
       

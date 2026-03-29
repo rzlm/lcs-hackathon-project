@@ -26,6 +26,7 @@ export default function MapView({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
+  const popupRef = useRef<maplibregl.Popup | null>(null);
 
   // Initialise map once
   useEffect(() => {
@@ -40,6 +41,11 @@ export default function MapView({
 
     map.addControl(new maplibregl.NavigationControl(), 'top-right');
     mapRef.current = map;
+
+    // Popup styles
+    const style = document.createElement('style');
+    style.textContent = `.haven-popup .maplibregl-popup-content{background:#fff;border:1.5px solid #2D5A27;border-radius:8px;padding:6px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.15);}.haven-popup .maplibregl-popup-tip{border-top-color:#2D5A27;}`;
+    document.head.appendChild(style);
 
     return () => {
       markersRef.current.forEach((m) => m.remove());
@@ -65,6 +71,25 @@ export default function MapView({
     });
 
     // Add or update markers (skip services without coordinates)
+    // Remove existing popup
+    if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
+
+    // Show popup for selected marker
+    if (selectedId) {
+      const sel = services.find((s) => s.id === selectedId);
+      if (sel && sel.latitude != null && sel.longitude != null) {
+        popupRef.current = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+          offset: 14,
+          className: 'haven-popup',
+        })
+          .setLngLat([sel.longitude, sel.latitude])
+          .setHTML(`<span style="font-size:12px;font-weight:700;color:#1A1A1A;white-space:nowrap;">${sel.name}</span>`)
+          .addTo(map);
+      }
+    }
+
     services.filter((s): s is typeof s & { latitude: number; longitude: number } => s.latitude != null && s.longitude != null).forEach((service) => {
       const color = MARKER_HEX[scoreToColor(service.availability_score)];
       const selected = service.id === selectedId;

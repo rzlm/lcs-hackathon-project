@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -13,7 +13,7 @@ interface SearchBarProps {
 export default function SearchBar({
   value,
   onChangeText,
-  placeholder = 'I need a bed, food, shower…',
+  placeholder = 'Search shelters or addresses…',
 }: SearchBarProps) {
   const theme = useTheme();
 
@@ -21,14 +21,15 @@ export default function SearchBar({
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.background, borderColor: theme.backgroundElement },
+        { backgroundColor: theme.card, borderColor: '#DDD9D3' },
       ]}>
+      <Text style={styles.searchIcon}>⌕</Text>
       <TextInput
         style={[styles.input, { color: theme.text }]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={theme.textSecondary}
+        placeholderTextColor="#A8A49F"
         returnKeyType="search"
         clearButtonMode="while-editing"
         autoCorrect={false}
@@ -46,15 +47,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: Spacing.three,
     height: 48,
+    gap: Spacing.two,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  searchIcon: {
+    fontSize: 20,
+    color: '#A8A49F',
+    lineHeight: 22,
+    ...(Platform.OS === 'web' ? { userSelect: 'none' } as any : {}),
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } as any : {}),
   },
 });

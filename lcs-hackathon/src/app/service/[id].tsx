@@ -11,6 +11,7 @@ export default function ServiceDetailScreen() {
   const { services, loading } = useServices(EMPTY_FILTERS, TORONTO_CENTER);
   const service = services.find((s) => s.id === id);
 
+  if (loading && !service) return <View style={styles.center}><ActivityIndicator size="large" color="#2D5A27" /></View>;
   if (!service) return <View style={styles.center}><Text>Shelter Not Found</Text></View>;
 
   const isLive = service.availability_label !== 'unknown';

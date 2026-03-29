@@ -1,74 +1,34 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Spacing, Palette } from '@/constants/theme';
+import { Palette, Spacing } from '@/constants/theme';
 import type { ServiceFilters } from '@/types/service';
-
-interface Chip {
-  id: string;
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}
+import { EMPTY_FILTERS } from '@/types/service';
 
 interface FilterChipsProps {
   filters: ServiceFilters;
   onFiltersChange: (filters: ServiceFilters) => void;
 }
 
-/**
- * Helper to add or remove an item from the filter array
- */
 function toggle<T>(arr: T[], item: T): T[] {
   return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 }
 
-/** * EXACT matches for your JSON "sector" field 
- */
 const SECTOR_CHIPS = [
+  { id: 'Men', label: 'Men' },
   { id: 'Women', label: 'Women' },
   { id: 'Youth', label: 'Youth' },
   { id: 'Families', label: 'Families' },
-  { id: 'Men', label: 'Men' },
   { id: 'Mixed Adult', label: 'Mixed Adult' },
 ];
 
-/** * EXACT matches for your JSON "capacity_type" field 
- */
 const CAPACITY_CHIPS = [
-  { id: 'Bed Based Capacity', label: 'Beds' },
-  { id: 'Room Based Capacity', label: 'Rooms' },
+  { id: 'Bed Based Capacity', label: '🛏 Beds' },
+  { id: 'Room Based Capacity', label: '🍽' },
 ];
 
 export default function FilterChips({ filters, onFiltersChange }: FilterChipsProps) {
-  
-  const chips: Chip[] = [
-    // 1. Sector Filters (stored in filters.populations)
-    // ID must match JSON string exactly (e.g., "Women")
-    ...SECTOR_CHIPS.map(({ id, label }) => ({
-      id: id, 
-      label,
-      active: filters.populations.includes(id as any),
-      onPress: () =>
-        onFiltersChange({
-          ...filters,
-          populations: toggle(filters.populations, id as any),
-        }),
-    })),
-    
-    // 2. Capacity Filters (stored in filters.types)
-    // ID must match JSON string exactly (e.g., "Bed Based Capacity")
-    ...CAPACITY_CHIPS.map(({ id, label }) => ({
-      id: id,
-      label,
-      active: filters.types.includes(id as any),
-      onPress: () =>
-        onFiltersChange({
-          ...filters,
-          types: toggle(filters.types, id as any),
-        }),
-    })),
-  ];
+  const allActive = filters.populations.length === 0 && filters.types.length === 0;
 
   return (
     <ScrollView
@@ -76,30 +36,66 @@ export default function FilterChips({ filters, onFiltersChange }: FilterChipsPro
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.content}
     >
-      {chips.map((chip) => (
-        <TouchableOpacity
-          key={chip.id}
-          onPress={chip.onPress}
-          activeOpacity={0.8}
-          style={[
-            styles.chip,
-            {
-              // Sage Green for Active, White/Beige for Inactive
-              backgroundColor: chip.active ? Palette.accentGreen : Palette.card,
-              borderColor: chip.active ? Palette.accentGreenDark : '#E0DCD6',
-            },
-          ]}
-        >
-          <Text
+      {/* All chip */}
+      <TouchableOpacity
+        onPress={() => onFiltersChange(EMPTY_FILTERS)}
+        activeOpacity={0.8}
+        style={[styles.allChip, { backgroundColor: allActive ? Palette.accentGreen : '#E3DFD9' }]}
+      >
+        <Text style={[styles.allChipText, { color: allActive ? '#FFFFFF' : Palette.text }]}>
+          All
+        </Text>
+      </TouchableOpacity>
+
+      {/* Sector chips */}
+      {SECTOR_CHIPS.map(({ id, label }) => {
+        const active = filters.populations.includes(id as any);
+        return (
+          <TouchableOpacity
+            key={id}
+            onPress={() =>
+              onFiltersChange({ ...filters, populations: toggle(filters.populations, id as any) })
+            }
+            activeOpacity={0.8}
             style={[
-              styles.chipText,
-              { color: chip.active ? '#FFFFFF' : Palette.text },
+              styles.sectorChip,
+              { backgroundColor: active ? Palette.accentGreen : '#E3DFD9' },
             ]}
           >
-            {chip.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+            <Text style={[styles.chipText, { color: active ? '#FFFFFF' : Palette.text }]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+
+      {/* Divider */}
+      <View style={styles.divider} />
+
+      {/* Capacity chips */}
+      {CAPACITY_CHIPS.map(({ id, label }) => {
+        const active = filters.types.includes(id as any);
+        return (
+          <TouchableOpacity
+            key={id}
+            onPress={() =>
+              onFiltersChange({ ...filters, types: toggle(filters.types, id as any) })
+            }
+            activeOpacity={0.8}
+            style={[
+              styles.capacityChip,
+              {
+                backgroundColor: active ? Palette.accentGreen : '#FFFFFF',
+                borderColor: active ? Palette.accentGreenDark : '#CCC8C2',
+              },
+            ]}
+          >
+            <Text style={[styles.chipText, { color: active ? '#FFFFFF' : Palette.text }]}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </ScrollView>
   );
 }
@@ -109,20 +105,38 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     paddingHorizontal: Spacing.one,
     paddingVertical: Spacing.one,
+    alignItems: 'center',
   },
-  chip: {
+  allChip: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  allChipText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  sectorChip: {
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  capacityChip: {
     borderRadius: 25,
     borderWidth: 1.5,
-    paddingHorizontal: 18,
+    paddingHorizontal: 14,
     paddingVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
   },
   chipText: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
+  },
+  divider: {
+    width: 1,
+    height: 28,
+    backgroundColor: '#CCC8C2',
+    marginHorizontal: 2,
   },
 });

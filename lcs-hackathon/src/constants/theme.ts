@@ -13,8 +13,8 @@ export const Colors = {
     textSecondary: '#60646C',
     
     // Accents
-    accentGreen: '#b5e0a6',
-    accentGreenDark: '#8ac28b',
+    accentGreen: '#2D5A27',
+    accentGreenDark: '#1E4020',
     
     // Status Colours
     statusGreen: '#2E7D32',
@@ -32,8 +32,8 @@ export const Colors = {
     backgroundElement: '#212225',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
-    accentGreen: '#8ac28b',
-    accentGreenDark: '#6aa86b',
+    accentGreen: '#4CAF50',
+    accentGreenDark: '#388E3C',
     statusGreen: '#4CAF50',
     statusRed: '#EF5350',
     statusOrange: '#FFB74D',
