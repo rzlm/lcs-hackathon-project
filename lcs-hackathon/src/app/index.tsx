@@ -16,58 +16,47 @@ import { EMPTY_FILTERS } from '@/types/service';
 export default function MapScreen() {
   const router = useRouter();
   const { location } = useLocation();
-
   const [filters, setFilters] = useState<ServiceFilters>(EMPTY_FILTERS);
   const [sheetState, setSheetState] = useState<SheetState>('peek');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { services: rawServices } = useServices(filters, location);
+  // Pass the 'location' object directly. 
+  // Our hook now correctly reads { latitude, longitude } from your useLocation hook.
+  const { services: rawServices, loading } = useServices(filters, location);
 
-  // --- REPAIRED FILTER LOGIC ---
   const filteredServices = useMemo(() => {
     if (!rawServices) return [];
 
-    return rawServices.filter((s: any) => {
-      // 1. Search (Name/Address)
+    // We only need to filter here. 
+    // The sorting (Availability > Distance) is handled inside the useServices hook.
+    return rawServices.filter((s: Service) => {
       const searchStr = (filters.query || '').toLowerCase().trim();
+      
       const matchesSearch = !searchStr || 
         s.name?.toLowerCase().includes(searchStr) || 
         s.address_street?.toLowerCase().includes(searchStr);
-      
-      // 2. Sector Match (Women, Youth, etc.)
-      // Matches against s.type because that's where the hook puts it
-      const matchesSector = filters.populations.length === 0 || 
+
+      const matchesSector = 
+        filters.populations.length === 0 || 
         filters.populations.some(p => s.type === p);
 
-      // 3. Capacity Match (Beds vs Rooms)
-      // Matches against the newly added s.capacity_type
-      const matchesType = filters.types.length === 0 || 
+      const matchesType = 
+        filters.types.length === 0 || 
         filters.types.some(t => s.capacity_type === t);
 
       return matchesSearch && matchesSector && matchesType;
     });
   }, [rawServices, filters]);
 
-  const handleFiltersChange = useCallback((next: ServiceFilters) => {
-    setFilters(next);
-  }, []);
-
-  const handleQueryChange = useCallback((query: string) => {
-    setFilters(prev => ({ ...prev, query }));
-  }, []);
-
   const handleMarkerPress = useCallback((service: Service) => {
     setSelectedId(service.id);
-    setSheetState('half');
+    // Open to half-sheet so the user can see the card for the marker they tapped
+    setSheetState('half'); 
   }, []);
 
-  const handleServicePress = useCallback((service: Service) => {
-    setSelectedId(service.id);
-    router.push(`/service/${service.id}`);
-  }, [router]);
-
   return (
-    <View style={[styles.screen, { backgroundColor: Palette.background }]}>
+    <View style={styles.screen}>
+      {/* MAP LAYER */}
       <MapView
         services={filteredServices}
         selectedId={selectedId}
@@ -75,40 +64,80 @@ export default function MapScreen() {
         style={StyleSheet.absoluteFill}
       />
 
+      {/* SEARCH & FILTERS OVERLAY */}
+      <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
+        <View style={styles.controls} pointerEvents="box-none">
+          <SearchBar 
+            value={filters.query} 
+            onChangeText={(q) => setFilters(f => ({ ...f, query: q }))} 
+          />
+          <FilterChips filters={filters} onFiltersChange={setFilters} />
+          
+          {/* Subtle loading indicator when API is fetching ML data */}
+          {loading && (
+            <View style={styles.loadingToast}>
+              <Text style={styles.loadingText}>Updating live availability...</Text>
+            </View>
+          )}
+        </View>
+      </SafeAreaView>
+
+      {/* BOTTOM SHEET LIST */}
       <ServiceListSheet
         services={filteredServices}
         selectedId={selectedId}
-        onServicePress={handleServicePress}
+        onServicePress={(s) => {
+          setSelectedId(s.id);
+          router.push(`/service/${s.id}`);
+        }}
         sheetState={sheetState}
         onSheetStateChange={setSheetState}
       />
 
+      {/* FLOATING LIST BUTTON (Only visible when sheet is collapsed) */}
       {sheetState === 'peek' && (
         <TouchableOpacity
           onPress={() => setSheetState('half')}
-          style={styles.listBtn}
-          activeOpacity={0.85}>
-          <Text style={styles.listBtnText}>≡  List</Text>
+          style={styles.listBtn}>
+          <Text style={styles.listBtnText}>≡ List</Text>
         </TouchableOpacity>
       )}
-
-      <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
-        <View style={styles.controls} pointerEvents="box-none">
-          <SearchBar value={filters.query} onChangeText={handleQueryChange} />
-          <FilterChips filters={filters} onFiltersChange={handleFiltersChange} />
-        </View>
-      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 },
-  controls: { marginTop: Spacing.two, marginHorizontal: Spacing.three, gap: Spacing.two },
+  screen: { 
+    flex: 1, 
+    backgroundColor: Palette.background 
+  },
+  overlay: { 
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    zIndex: 20 
+  },
+  controls: { 
+    marginTop: Spacing.two, 
+    marginHorizontal: Spacing.three, 
+    gap: Spacing.two 
+  },
+  loadingToast: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  loadingText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: '600',
+  },
   listBtn: {
     position: 'absolute',
-    bottom: 110,
+    bottom: 110, // Sits above the peek area of the sheet
     right: Spacing.three,
     paddingHorizontal: 22,
     paddingVertical: 12,
@@ -116,12 +145,16 @@ const styles = StyleSheet.create({
     backgroundColor: Palette.card,
     borderColor: Palette.accentGreen,
     borderWidth: 2,
+    elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
     zIndex: 15,
   },
-  listBtnText: { fontSize: 16, fontWeight: '700', color: Palette.text },
+  listBtnText: { 
+    fontSize: 16, 
+    fontWeight: '700', 
+    color: Palette.text 
+  },
 });

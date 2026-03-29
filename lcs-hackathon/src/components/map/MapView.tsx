@@ -11,7 +11,6 @@ import { TORONTO_CENTER } from '@/hooks/use-location';
 import type { Service } from '@/types/service';
 import { MARKER_HEX, scoreToColor } from '@/utils/scoring';
 
-// CARTO free basemap — no API key required
 const CARTO_LIGHT = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 interface MapViewProps {
@@ -28,67 +27,80 @@ export default function MapView({
   style,
 }: MapViewProps) {
   return (
-    <Map
-      style={[styles.map, style]}
-      mapStyle={CARTO_LIGHT}>
-      <Camera
-        initialViewState={{
-          center: [TORONTO_CENTER.longitude, TORONTO_CENTER.latitude],
-          zoom: 13,
-        }}
-      />
+    <View style={styles.container}>
+      <Map
+        style={[styles.map, style]}
+        mapStyle={CARTO_LIGHT}
+        logoEnabled={false}
+        attributionEnabled={false}>
+        
+        <Camera
+          initialViewState={{
+            center: [TORONTO_CENTER.longitude, TORONTO_CENTER.latitude],
+            zoom: 12,
+          }}
+        />
 
-      <UserLocation />
+        <UserLocation />
 
-      {services.map((service) => {
-        const color = MARKER_HEX[scoreToColor(service.availability_score)];
-        const selected = service.id === selectedId;
-        const size = selected ? 22 : 16;
-        return (
-          <Marker
-            key={service.id}
-            lngLat={[service.longitude, service.latitude]}>
-            <View
-              onTouchEnd={() => onMarkerPress(service)}
-              style={[
-                styles.marker,
-                {
-                  width: size,
-                  height: size,
-                  borderRadius: size / 2,
-                  backgroundColor: color,
-                  borderWidth: selected ? 3 : 2,
-                  borderColor: selected ? '#fff' : 'rgba(255,255,255,0.85)',
-                },
-              ]}>
-              {selected && (
-                <View style={[styles.pulse, { borderColor: color }]} />
-              )}
-            </View>
-          </Marker>
-        );
-      })}
-    </Map>
+        {services.map((service) => {
+          const color = MARKER_HEX[scoreToColor(service.availability_score)];
+          const selected = service.id === selectedId;
+          const size = selected ? 24 : 18;
+
+          return (
+            <Marker
+              key={`marker-${service.id}`}
+              id={service.id}
+              coordinate={[service.longitude, service.latitude]} // Use 'coordinate' if lngLat fails
+              // @ts-ignore - Some versions of MapLibre use lngLat, some use coordinate
+              lngLat={[service.longitude, service.latitude]}
+              anchor={{ x: 0.5, y: 0.5 }} // Center the marker on the point
+              onPress={() => onMarkerPress(service)}>
+              
+              <View
+                style={[
+                  styles.markerContainer,
+                  {
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    backgroundColor: color,
+                    borderColor: selected ? '#FFFFFF' : 'rgba(255,255,255,0.8)',
+                    borderWidth: selected ? 3 : 2,
+                    zIndex: selected ? 99 : 1,
+                  },
+                ]}>
+                {selected && (
+                  <View style={[styles.pulse, { borderColor: color }]} />
+                )}
+              </View>
+            </Marker>
+          );
+        })}
+      </Map>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  map: {
-    flex: 1,
-  },
-  marker: {
+  container: { flex: 1 },
+  map: { flex: 1 },
+  markerContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.4,
     shadowRadius: 3,
-    elevation: 4,
+    elevation: 10, // Higher elevation for Android visibility
   },
   pulse: {
     position: 'absolute',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    opacity: 0.35,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 3,
+    opacity: 0.4,
   },
 });

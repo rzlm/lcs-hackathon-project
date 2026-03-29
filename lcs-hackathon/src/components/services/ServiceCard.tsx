@@ -11,8 +11,8 @@ import { MARKER_HEX, scoreToColor } from '@/utils/scoring';
 const AVAILABILITY_TEXT: Record<string, string> = {
   available: 'Space available',
   limited: 'Filling up',
-  full: 'Full right now',
-  unknown: 'Status unknown',
+  full: 'At capacity',
+  unknown: 'Check status',
 };
 
 interface ServiceCardProps {
@@ -28,10 +28,14 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   const theme = useTheme();
   const color = MARKER_HEX[scoreToColor(service.availability_score)];
+  
+  // Use your helper from distance.ts
+  const distanceLabel = service.distance_m != null ? formatDistance(service.distance_m) : null;
+
   const availabilityText =
     service.availability_label != null
       ? AVAILABILITY_TEXT[service.availability_label]
-      : 'Status unknown';
+      : AVAILABILITY_TEXT.unknown;
 
   return (
     <TouchableOpacity
@@ -44,7 +48,8 @@ export default function ServiceCard({
           borderBottomColor: theme.backgroundElement,
         },
       ]}>
-      {/* Colored availability stripe on left edge */}
+      
+      {/* Visual Indicator Stripe */}
       <View style={[styles.stripe, { backgroundColor: color }]} />
 
       <View style={styles.body}>
@@ -52,9 +57,9 @@ export default function ServiceCard({
           <Text style={[styles.name, { color: theme.text }]} numberOfLines={1}>
             {service.name}
           </Text>
-          {service.distance_m !== undefined && (
+          {distanceLabel && (
             <Text style={[styles.distance, { color: theme.textSecondary }]}>
-              {formatDistance(service.distance_m)}
+              {distanceLabel}
             </Text>
           )}
         </View>
@@ -62,10 +67,20 @@ export default function ServiceCard({
         <View style={styles.metaRow}>
           <View style={[styles.badge, { backgroundColor: theme.backgroundElement }]}>
             <Text style={[styles.badgeText, { color: theme.textSecondary }]}>
-              {SERVICE_TYPE_LABELS[service.type]}
+              {SERVICE_TYPE_LABELS[service.type] || service.type}
             </Text>
           </View>
-          <Text style={[styles.availability, { color }]}>{availabilityText}</Text>
+          
+          <Text style={[styles.availability, { color }]}>
+            {availabilityText}
+          </Text>
+
+          {/* Optional: Show predicted bed count if it's a live update */}
+          {service.predicted_count > 0 && (
+            <Text style={[styles.count, { color: theme.textSecondary }]}>
+              • {service.predicted_count} beds
+            </Text>
+          )}
         </View>
 
         {service.address_street != null && (
@@ -82,16 +97,17 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    minHeight: 76,
+    minHeight: 88, // Slightly taller to feel more spacious
   },
   stripe: {
-    width: 4,
+    width: 6, // Slightly thicker for better visual grouping
   },
   body: {
     flex: 1,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two + 2,
-    gap: Spacing.one,
+    paddingVertical: Spacing.two,
+    justifyContent: 'center',
+    gap: 4,
   },
   topRow: {
     flexDirection: 'row',
@@ -100,11 +116,12 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700', // Bolder for better hierarchy
     flex: 1,
   },
   distance: {
     fontSize: 13,
+    fontWeight: '500',
     marginLeft: Spacing.two,
   },
   metaRow: {
@@ -113,19 +130,24 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   badge: {
-    borderRadius: 4,
-    paddingHorizontal: 6,
+    borderRadius: 6,
+    paddingHorizontal: 8,
     paddingVertical: 2,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase', // Professional look
   },
   availability: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
+  },
+  count: {
+    fontSize: 12,
   },
   address: {
     fontSize: 13,
+    marginTop: 2,
   },
 });
