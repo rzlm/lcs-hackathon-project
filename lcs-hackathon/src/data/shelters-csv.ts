@@ -1,8 +1,28 @@
 /**
  * Static snapshot of shelter_registry.csv — used as offline fallback.
- * No coordinates are available from the CSV; those come from the DB.
+ * Coordinates are merged in from the bundled shelters.json snapshot when
+ * address matches are available, so markers can still render offline.
  */
+import bundledShelters from '../../assets/data/shelters.json';
 import type { Service } from '@/types/service';
+
+type BundledShelter = {
+  address: string | null;
+  lat: number | null;
+  lng: number | null;
+};
+
+const BUNDLED_SHELTERS = bundledShelters as BundledShelter[];
+
+function normalizeAddress(value: string | null): string {
+  return (value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+const COORDS_BY_ADDRESS = new Map(
+  BUNDLED_SHELTERS
+    .filter((row) => row.address && row.lat != null && row.lng != null)
+    .map((row) => [normalizeAddress(row.address), { latitude: row.lat, longitude: row.lng }]),
+);
 
 type CsvRow = {
   id: string;
@@ -98,27 +118,31 @@ const CSV_ROWS: CsvRow[] = [
   row('csv-81',  'YouthLink Shelter',                      'YouthLink',                                          '747 Warden Ave',                 false, false, true,  false),
 ];
 
-export const CSV_SHELTERS: Service[] = CSV_ROWS.map((r) => ({
-  id: r.id,
-  external_id: parseInt(r.id.replace('csv-', ''), 10),
-  name: r.name,
-  type: 'shelter',
-  description: r.organization_name !== r.name ? `Operated by ${r.organization_name}` : null,
-  latitude: null,
-  longitude: null,
-  address_street: r.address_street,
-  phone: null,
-  website: null,
-  hours_json: null,
-  is_24_hours: false,
-  wheelchair_accessible: false,
-  no_stairs: false,
-  serves_men: r.serves_men,
-  serves_women: r.serves_women,
-  serves_youth: r.serves_youth,
-  serves_families: r.serves_families,
-  availability_score: null,
-  availability_label: null,
-  last_availability_at: null,
-  is_bookmarked: false,
-}));
+export const CSV_SHELTERS: Service[] = CSV_ROWS.map((r) => {
+  const coords = COORDS_BY_ADDRESS.get(normalizeAddress(r.address_street));
+
+  return {
+    id: r.id,
+    external_id: parseInt(r.id.replace('csv-', ''), 10),
+    name: r.name,
+    type: 'shelter',
+    description: r.organization_name !== r.name ? `Operated by ${r.organization_name}` : null,
+    latitude: coords?.latitude ?? null,
+    longitude: coords?.longitude ?? null,
+    address_street: r.address_street,
+    phone: null,
+    website: null,
+    hours_json: null,
+    is_24_hours: false,
+    wheelchair_accessible: false,
+    no_stairs: false,
+    serves_men: r.serves_men,
+    serves_women: r.serves_women,
+    serves_youth: r.serves_youth,
+    serves_families: r.serves_families,
+    availability_score: null,
+    availability_label: null,
+    last_availability_at: null,
+    is_bookmarked: false,
+  };
+});

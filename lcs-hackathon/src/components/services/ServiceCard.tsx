@@ -16,8 +16,10 @@ interface ServiceCardProps {
 export default function ServiceCard({ service, onPress, isSelected = false }: ServiceCardProps) {
   const theme = useTheme();
   
-  // Scoring utility returns 'gray' for 0.5
-  const isUnknown = service.availability_score === 0.5;
+  const isUnknown =
+    service.availability_score == null ||
+    service.availability_score === 0.5 ||
+    service.availability_label === 'unknown';
   const statusColor = MARKER_HEX[scoreToColor(service.availability_score)];
   const distanceLabel = service.distance_m != null ? formatDistance(service.distance_m) : null;
 

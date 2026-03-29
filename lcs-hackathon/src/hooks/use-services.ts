@@ -33,17 +33,21 @@ function startFetch() {
 
   fetchShelters()
     .then(async ({ data, source: src }) => {
-      // --- Phase 1: show shelters right away with neutral scores ---
+      // --- Phase 1: show shelters right away ---
+      // Keep CSV fallback visibly offline/unknown so markers stay gray.
       cachedServices = data.map((s) => ({
         ...s,
-        availability_score: 0.5,
-        availability_label: 'unknown' as const,
+        availability_score: src === 'csv' ? null : 0.5,
+        availability_label: src === 'csv' ? null : ('unknown' as const),
         predicted_count: undefined,
       }));
       cachedSource = src;
       notifyAll();
 
       // --- Phase 2: enrich with live ML predictions ---
+      // Skip this when we're already on the bundled offline fallback.
+      if (src === 'csv') return;
+
       try {
         const controller = new AbortController();
         // 15 s — gives a warm Render server time to respond (~5 s observed)
