@@ -17,6 +17,7 @@ export type AccessibilityFilter = 'wheelchair' | 'no_stairs';
 
 export interface Service {
   id: string;
+  external_id: number | null;  // numeric SHELTER_ID from Toronto Open Data / FastAPI
   name: string;
   type: ServiceType;
   description: string | null;

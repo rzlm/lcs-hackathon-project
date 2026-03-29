@@ -5,6 +5,7 @@ import type { AvailabilityLabel, Service } from '@/types/service';
 // Shape of a row returned from the Supabase shelters table
 type DbShelter = {
   id: string;
+  external_id: number | null;
   name: string;
   organization_name: string;
   description: string | null;
@@ -29,6 +30,7 @@ type DbShelter = {
 function mapDbRow(row: DbShelter): Service {
   return {
     id: row.id,
+    external_id: row.external_id,
     name: row.name,
     type: 'shelter',
     description: row.description ?? (row.organization_name !== row.name ? `Operated by ${row.organization_name}` : null),
@@ -71,7 +73,7 @@ export async function fetchShelters(): Promise<{ data: Service[]; source: 'supab
     const { data, error } = await getSupabase()
       .from('shelters')
       .select(
-        'id, name, organization_name, description, latitude, longitude, ' +
+        'id, external_id, name, organization_name, description, latitude, longitude, ' +
         'address_street, phone, website, hours_json, is_24_hours, ' +
         'wheelchair_accessible, no_stairs, ' +
         'serves_men, serves_women, serves_youth, serves_families, ' +

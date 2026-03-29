@@ -100,6 +100,7 @@ const CSV_ROWS: CsvRow[] = [
 
 export const CSV_SHELTERS: Service[] = CSV_ROWS.map((r) => ({
   id: r.id,
+  external_id: parseInt(r.id.replace('csv-', ''), 10),
   name: r.name,
   type: 'shelter',
   description: r.organization_name !== r.name ? `Operated by ${r.organization_name}` : null,

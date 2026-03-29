@@ -21,20 +21,16 @@ export default function ServiceCard({
 }: ServiceCardProps) {
   const theme = useTheme();
   
-  // --- COLOR LOGIC ---
-  // If score is 0.5 (initial/offline), use a neutral gray. 
-  // Otherwise, use the scoring utility (Green/Orange/Red).
-  const isUnknown = service.availability_score === 0.5;
-  const statusColor = isUnknown ? '#94a3b8' : MARKER_HEX[scoreToColor(service.availability_score)];
-  
+  const statusColor = MARKER_HEX[scoreToColor(service.availability_score)];
   const distanceLabel = service.distance_m != null ? formatDistance(service.distance_m) : null;
 
   const getStatusText = () => {
-    // If the count is 0 but confirmed by API
-    if (service.availability_label === 'full') return 'Currently full';
-
-    // While loading or if API fails
-    return 'Checking status...';
+    switch (service.availability_label) {
+      case 'available': return 'Space available';
+      case 'limited':   return 'Limited space';
+      case 'full':      return 'Currently full';
+      default:          return 'Status unknown';
+    }
   };
 
   return (

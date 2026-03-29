@@ -37,7 +37,7 @@ export function useServices(
             const merged = data.map((s) => {
               const liveInfo = liveData.find(
                 (l: { shelter_id: number | string; predicted_beds: number }) =>
-                  String(l.shelter_id) === s.id || String(l.shelter_id) === s.id.replace('csv-', ''),
+                  s.external_id != null && Number(l.shelter_id) === s.external_id,
               );
               if (liveInfo) {
                 const count = liveInfo.predicted_beds;
