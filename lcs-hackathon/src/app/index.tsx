@@ -9,7 +9,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,19 +25,18 @@ import { EMPTY_FILTERS } from '@/types/service';
 
 export default function MapScreen() {
   const router = useRouter();
-  const { width } = useWindowDimensions();
   const { location } = useLocation();
   const [filters, setFilters] = useState<ServiceFilters>(EMPTY_FILTERS);
   const [sheetState, setSheetState] = useState<SheetState>('peek');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { services, loading, source } = useServices(filters, location);
-  const isDesktopWeb = Platform.OS === 'web' && width >= 960;
+  const isWeb = Platform.OS === 'web';
 
   const handleMarkerPress = useCallback((service: Service) => {
     setSelectedId(service.id);
-    if (!isDesktopWeb) setSheetState('half');
-  }, []);
+    if (!isWeb) setSheetState('half');
+  }, [isWeb]);
 
   return (
     <View style={styles.screen}>
@@ -86,8 +84,8 @@ export default function MapScreen() {
         </View>
       </SafeAreaView>
 
-      <View style={[styles.content, isDesktopWeb && styles.contentDesktop]}>
-        <View style={[styles.mapContainer, isDesktopWeb && styles.mapContainerDesktop]}>
+      <View style={[styles.content, isWeb && styles.contentDesktop]}>
+        <View style={[styles.mapContainer, isWeb && styles.mapContainerDesktop]}>
           <MapView
             services={services}
             selectedId={selectedId}
@@ -96,7 +94,7 @@ export default function MapScreen() {
           />
         </View>
 
-        {isDesktopWeb && (
+        {isWeb && (
           <View style={styles.desktopListPanel}>
             <View style={styles.desktopListHeader}>
               <Text style={styles.desktopListTitle}>
@@ -136,7 +134,7 @@ export default function MapScreen() {
         )}
       </View>
 
-      {!isDesktopWeb && (
+      {!isWeb && (
         <ServiceListSheet
           services={services}
           selectedId={selectedId}
@@ -151,7 +149,7 @@ export default function MapScreen() {
         />
       )}
 
-      {!isDesktopWeb && sheetState === 'peek' && (
+      {!isWeb && sheetState === 'peek' && (
         <TouchableOpacity
           onPress={() => setSheetState('half')}
           style={styles.listBtn}

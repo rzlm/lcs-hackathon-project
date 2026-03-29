@@ -71,7 +71,7 @@ export function useServices(
                 return s;
               });
             }
-          } catch (e) {
+          } catch {
             console.log("FastAPI unreachable: Fallback to neutral status.");
           }
           

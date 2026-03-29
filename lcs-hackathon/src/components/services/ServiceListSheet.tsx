@@ -88,7 +88,8 @@ export default function ServiceListSheet({
     const snap = stateToSnap(sheetState);
     translateY.value = withSpring(snap, SPRING);
     gestureStart.value = snap;
-  }, [sheetState, H]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sheetState, H]); // translateY/gestureStart are stable reanimated shared values; stateToSnap derives from H
 
   const notifyState = (y: number) => onSheetStateChange(snapToState(y));
 
@@ -239,7 +240,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    boxShadow: '0 -3px 12px rgba(0,0,0,0.12)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 16,
     overflow: 'hidden',
     zIndex: 30,
   },

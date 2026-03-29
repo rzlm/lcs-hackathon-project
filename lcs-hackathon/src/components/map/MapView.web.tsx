@@ -47,9 +47,10 @@ export default function MapView({
     style.textContent = `.haven-popup .maplibregl-popup-content{background:#fff;border:1.5px solid #2D5A27;border-radius:8px;padding:6px 10px;box-shadow:0 2px 8px rgba(0,0,0,0.15);}.haven-popup .maplibregl-popup-tip{border-top-color:#2D5A27;}`;
     document.head.appendChild(style);
 
+    const markers = markersRef.current;
     return () => {
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current.clear();
+      markers.forEach((m) => m.remove());
+      markers.clear();
       map.remove();
       mapRef.current = null;
     };
@@ -126,7 +127,7 @@ export default function MapView({
 
       markersRef.current.set(service.id, marker);
     });
-  }, [services, selectedId]);
+  }, [services, selectedId, onMarkerPress]);
 
   return (
     <View style={[styles.container, style]}>

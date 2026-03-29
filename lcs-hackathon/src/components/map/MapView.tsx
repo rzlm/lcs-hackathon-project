@@ -55,10 +55,8 @@ export default function MapView({
               <Marker
                 key={`marker-${service.id}`}
                 id={service.id}
-                // @ts-ignore — coordinate prop used as fallback for some MapLibre versions
                 coordinate={[service.longitude, service.latitude]}
                 lngLat={[service.longitude, service.latitude]}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 anchor={{ x: 0.5, y: selected ? 1.0 : 0.5 } as any}
                 onPress={() => onMarkerPress(service)}>
                 <View style={styles.markerWrapper}>
