@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MapView from '@/components/map/MapView';
@@ -34,8 +34,11 @@ export default function MapScreen() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logoArea}>
-            {/* Logo placeholder */}
-            <View style={styles.logoPlaceholder} />
+            <Image
+              source={require('@/assets/images/havennow.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
             <Text style={styles.logoText}>
               <Text style={styles.logoHaven}>Haven</Text>
               <Text style={styles.logoNow}>Now</Text>
@@ -119,11 +122,9 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
   },
   logoArea: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  logoPlaceholder: {
+  logoImage: {
     width: 34,
     height: 34,
-    borderRadius: 8,
-    backgroundColor: Palette.accentGreen,
   },
   logoText: { fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
   logoHaven: { color: '#B8832A' },

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
   FlatList,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -47,6 +48,7 @@ export default function ServiceListSheet({
   const theme = useTheme();
   const { height: H } = useWindowDimensions();
   const listRef = useRef<FlatList>(null);
+  const isWeb = Platform.OS === 'web';
 
   // --- AUTO-SCROLL TO SELECTED ITEM ---
   // Delay scroll until after the sheet spring animation (~350ms) completes
@@ -107,6 +109,73 @@ export default function ServiceListSheet({
     opacity: interpolate(translateY.value, [SNAP_HALF, SNAP_PEEK], [1, 0], 'clamp'),
   }));
 
+  const webSheetHeight =
+    sheetState === 'peek' ? PEEK_HEIGHT : sheetState === 'half' ? H * 0.48 : H * 0.78;
+
+  const webSheetStyle = {
+    height: webSheetHeight,
+    backgroundColor: theme.background,
+  } as const;
+
+  const webListStyle = {
+    opacity: sheetState === 'peek' ? 0 : 1,
+    display: sheetState === 'peek' ? 'none' : 'flex',
+  } as const;
+
+  if (isWeb) {
+    return (
+      <View style={[styles.webSheet, webSheetStyle]}>
+        <View style={[styles.handleArea, { borderBottomColor: theme.backgroundElement }]}>
+          <View style={[styles.handle, { backgroundColor: theme.backgroundSelected }]} />
+          <View style={styles.peekRow}>
+            <Text style={[styles.count, { color: theme.text }]}>
+              {loading
+                ? 'Finding places...'
+                : services.length === 0
+                  ? 'No places nearby'
+                  : `${services.length} place${services.length === 1 ? '' : 's'} nearby`}
+              {!loading && offlineMode && (
+                <Text style={{ color: theme.textSecondary, fontWeight: '400', fontSize: 13 }}>{' '}(offline)</Text>
+              )}
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                onSheetStateChange(
+                  sheetState === 'peek' ? 'half' : sheetState === 'half' ? 'full' : 'peek',
+                )
+              }>
+              <Text style={[styles.collapse, { color: theme.textSecondary }]}>
+                {sheetState === 'peek' ? '↑' : sheetState === 'half' ? '↑' : '↓'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={[styles.list, webListStyle]}>
+          <FlatList
+            ref={listRef}
+            data={services}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <ServiceCard
+                service={item}
+                onPress={() => onServicePress(item)}
+                isSelected={item.id === selectedId}
+              />
+            )}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No places found nearby.</Text>
+              </View>
+            }
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <Animated.View style={[styles.sheet, { backgroundColor: theme.background, height: H }, sheetStyle]} pointerEvents="box-none">
       <GestureDetector gesture={pan}>
@@ -163,6 +232,17 @@ export default function ServiceListSheet({
 
 const styles = StyleSheet.create({
   sheet: { position: 'absolute', top: 0, left: 0, right: 0, borderTopLeftRadius: 16, borderTopRightRadius: 16, elevation: 16, shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.12, shadowRadius: 12 },
+  webSheet: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    boxShadow: '0 -3px 12px rgba(0,0,0,0.12)',
+    overflow: 'hidden',
+    zIndex: 30,
+  },
   handleArea: { paddingTop: Spacing.two, paddingBottom: Spacing.two, paddingHorizontal: Spacing.three, borderBottomWidth: StyleSheet.hairlineWidth },
   handle: { width: 36, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: Spacing.two },
   peekRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: Spacing.one },
