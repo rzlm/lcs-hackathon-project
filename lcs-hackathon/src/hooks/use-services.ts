@@ -15,13 +15,16 @@ export function useServices(filters: ServiceFilters, location?: any) {
     async function getShelterData() {
       setLoading(true);
 
-      // 1. Initial Offline State
+      // 1. Initial Offline State - MAP ALL NECESSARY FIELDS
       const offlineMapped: Service[] = (OFFLINE_SHELTERS as any[]).map((s) => ({
         id: String(s.id),
         name: s.name,
         address_street: s.address,
-        type: s.sector,
-        availability_label: 'unknown', // Default
+        // We map sector to 'type' because your Detail screen uses .type
+        type: s.sector, 
+        // IMPORTANT: We must include this so the filter works!
+        capacity_type: s.capacity_type, 
+        availability_label: 'unknown',
         availability_score: 0.5,
         predicted_count: 0,
         latitude: Number(s.lat),
@@ -53,7 +56,7 @@ export function useServices(filters: ServiceFilters, location?: any) {
           setServices(merged);
         }
       } catch (error) {
-        console.warn("Could not reach Fast API. Check if your computer IP is correct and server is running.");
+        console.warn("Could not reach Fast API. Using offline data.");
       } finally {
         setLoading(false);
       }

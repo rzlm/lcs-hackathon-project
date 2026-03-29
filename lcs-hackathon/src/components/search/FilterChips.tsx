@@ -1,14 +1,8 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import type {
-  AccessibilityFilter,
-  PopulationFilter,
-  ServiceFilters,
-  ServiceType,
-} from '@/types/service';
+import { Spacing, Palette } from '@/constants/theme';
+import type { ServiceFilters } from '@/types/service';
 
 interface Chip {
   id: string;
@@ -22,96 +16,86 @@ interface FilterChipsProps {
   onFiltersChange: (filters: ServiceFilters) => void;
 }
 
+/**
+ * Helper to add or remove an item from the filter array
+ */
 function toggle<T>(arr: T[], item: T): T[] {
   return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 }
 
-const TYPE_CHIPS: Array<{ type: ServiceType; label: string }> = [
-  { type: 'shelter', label: 'Shelter' },
-  { type: 'food', label: 'Food' },
-  { type: 'clinic', label: 'Clinic' },
-  { type: 'library', label: 'Library' },
-  { type: 'wifi', label: 'WiFi' },
-  { type: 'hygiene', label: 'Hygiene' },
-  { type: 'warming_centre', label: 'Warming' },
-  { type: 'cooling_centre', label: 'Cooling' },
-  { type: 'drop_in', label: 'Drop-in' },
+/** * EXACT matches for your JSON "sector" field 
+ */
+const SECTOR_CHIPS = [
+  { id: 'Women', label: 'Women' },
+  { id: 'Youth', label: 'Youth' },
+  { id: 'Families', label: 'Families' },
+  { id: 'Men', label: 'Men' },
+  { id: 'Mixed Adult', label: 'Mixed Adult' },
 ];
 
-const POP_CHIPS: Array<{ pop: PopulationFilter; label: string }> = [
-  { pop: 'women', label: 'Women' },
-  { pop: 'youth', label: 'Youth' },
-  { pop: 'families', label: 'Families' },
+/** * EXACT matches for your JSON "capacity_type" field 
+ */
+const CAPACITY_CHIPS = [
+  { id: 'Bed Based Capacity', label: 'Beds' },
+  { id: 'Room Based Capacity', label: 'Rooms' },
 ];
 
 export default function FilterChips({ filters, onFiltersChange }: FilterChipsProps) {
-  const theme = useTheme();
-
+  
   const chips: Chip[] = [
-    {
-      id: 'open_now',
-      label: 'Open now',
-      active: filters.openNow,
-      onPress: () => onFiltersChange({ ...filters, openNow: !filters.openNow }),
-    },
-    {
-      id: 'has_space',
-      label: 'Space available',
-      active: filters.hasAvailability,
-      onPress: () =>
-        onFiltersChange({ ...filters, hasAvailability: !filters.hasAvailability }),
-    },
-    ...TYPE_CHIPS.map(({ type, label }) => ({
-      id: `type_${type}`,
+    // 1. Sector Filters (stored in filters.populations)
+    // ID must match JSON string exactly (e.g., "Women")
+    ...SECTOR_CHIPS.map(({ id, label }) => ({
+      id: id, 
       label,
-      active: filters.types.includes(type),
-      onPress: () =>
-        onFiltersChange({ ...filters, types: toggle(filters.types, type) }),
-    })),
-    ...POP_CHIPS.map(({ pop, label }) => ({
-      id: `pop_${pop}`,
-      label,
-      active: filters.populations.includes(pop),
+      active: filters.populations.includes(id as any),
       onPress: () =>
         onFiltersChange({
           ...filters,
-          populations: toggle(filters.populations, pop),
+          populations: toggle(filters.populations, id as any),
         }),
     })),
-    {
-      id: 'acc_wheelchair',
-      label: 'Wheelchair',
-      active: filters.accessibility.includes('wheelchair'),
+    
+    // 2. Capacity Filters (stored in filters.types)
+    // ID must match JSON string exactly (e.g., "Bed Based Capacity")
+    ...CAPACITY_CHIPS.map(({ id, label }) => ({
+      id: id,
+      label,
+      active: filters.types.includes(id as any),
       onPress: () =>
         onFiltersChange({
           ...filters,
-          accessibility: toggle(filters.accessibility, 'wheelchair' as AccessibilityFilter),
+          types: toggle(filters.types, id as any),
         }),
-    },
+    })),
   ];
 
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.content}>
+      contentContainerStyle={styles.content}
+    >
       {chips.map((chip) => (
         <TouchableOpacity
           key={chip.id}
           onPress={chip.onPress}
-          activeOpacity={0.75}
+          activeOpacity={0.8}
           style={[
             styles.chip,
             {
-              backgroundColor: chip.active ? theme.text : theme.background,
-              borderColor: chip.active ? theme.text : theme.backgroundElement,
+              // Sage Green for Active, White/Beige for Inactive
+              backgroundColor: chip.active ? Palette.accentGreen : Palette.card,
+              borderColor: chip.active ? Palette.accentGreenDark : '#E0DCD6',
             },
-          ]}>
+          ]}
+        >
           <Text
             style={[
               styles.chipText,
-              { color: chip.active ? theme.background : theme.text },
-            ]}>
+              { color: chip.active ? '#FFFFFF' : Palette.text },
+            ]}
+          >
             {chip.label}
           </Text>
         </TouchableOpacity>
@@ -127,18 +111,18 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
   },
   chip: {
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: 7,
+    borderRadius: 25,
+    borderWidth: 1.5,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
   },
   chipText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '700',
   },
 });

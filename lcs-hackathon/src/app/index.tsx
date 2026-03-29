@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,45 +13,48 @@ import { useServices } from '@/hooks/use-services';
 import type { Service, ServiceFilters } from '@/types/service';
 import { EMPTY_FILTERS } from '@/types/service';
 
-function hasActiveFilters(f: ServiceFilters): boolean {
-  return (
-    f.query.length > 0 ||
-    f.types.length > 0 ||
-    f.populations.length > 0 ||
-    f.accessibility.length > 0 ||
-    f.openNow ||
-    f.hasAvailability
-  );
-}
-
 export default function MapScreen() {
   const router = useRouter();
   const { location } = useLocation();
 
-  // 1. Updated Filters to match actual Data (Women, Youth, Bed Based, etc.)
   const [filters, setFilters] = useState<ServiceFilters>(EMPTY_FILTERS);
   const [sheetState, setSheetState] = useState<SheetState>('peek');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // 2. This hook now triggers the FastAPI fetch whenever 'filters' changes
-  const { services, loading } = useServices(filters, location);
+  const { services: rawServices } = useServices(filters, location);
 
-  const handleFiltersChange = useCallback(
-    (next: ServiceFilters) => {
-      setFilters(next);
-      if (hasActiveFilters(next)) {
-        setSheetState((prev) => (prev === 'peek' ? 'half' : prev));
-      }
-    },
-    [],
-  );
+  // --- REPAIRED FILTER LOGIC ---
+  const filteredServices = useMemo(() => {
+    if (!rawServices) return [];
 
-  const handleQueryChange = useCallback(
-    (query: string) => {
-      handleFiltersChange({ ...filters, query });
-    },
-    [filters, handleFiltersChange],
-  );
+    return rawServices.filter((s: any) => {
+      // 1. Search (Name/Address)
+      const searchStr = (filters.query || '').toLowerCase().trim();
+      const matchesSearch = !searchStr || 
+        s.name?.toLowerCase().includes(searchStr) || 
+        s.address_street?.toLowerCase().includes(searchStr);
+      
+      // 2. Sector Match (Women, Youth, etc.)
+      // Matches against s.type because that's where the hook puts it
+      const matchesSector = filters.populations.length === 0 || 
+        filters.populations.some(p => s.type === p);
+
+      // 3. Capacity Match (Beds vs Rooms)
+      // Matches against the newly added s.capacity_type
+      const matchesType = filters.types.length === 0 || 
+        filters.types.some(t => s.capacity_type === t);
+
+      return matchesSearch && matchesSector && matchesType;
+    });
+  }, [rawServices, filters]);
+
+  const handleFiltersChange = useCallback((next: ServiceFilters) => {
+    setFilters(next);
+  }, []);
+
+  const handleQueryChange = useCallback((query: string) => {
+    setFilters(prev => ({ ...prev, query }));
+  }, []);
 
   const handleMarkerPress = useCallback((service: Service) => {
     setSelectedId(service.id);
@@ -61,57 +64,38 @@ export default function MapScreen() {
   const handleServicePress = useCallback((service: Service) => {
     setSelectedId(service.id);
     router.push(`/service/${service.id}`);
-  }, [router, setSelectedId]);
+  }, [router]);
 
   return (
     <View style={[styles.screen, { backgroundColor: Palette.background }]}>
-      {/* Layer 1: Map (background) - No changes to layout */}
       <MapView
-        services={services}
+        services={filteredServices}
         selectedId={selectedId}
         onMarkerPress={handleMarkerPress}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Layer 2: Sliding service list sheet - Keep original behavior */}
       <ServiceListSheet
-        services={services}
+        services={filteredServices}
         selectedId={selectedId}
         onServicePress={handleServicePress}
         sheetState={sheetState}
         onSheetStateChange={setSheetState}
       />
 
-      {/* Layer 3: Floating "List" button (Sage Green/Beige Aesthetic) */}
       {sheetState === 'peek' && (
         <TouchableOpacity
           onPress={() => setSheetState('half')}
-          style={[
-            styles.listBtn,
-            {
-              backgroundColor: Palette.card, 
-              borderColor: Palette.accentGreen,
-            },
-          ]}
+          style={styles.listBtn}
           activeOpacity={0.85}>
-          {/* Using text instead of black icons for a softer look */}
-          <Text style={[styles.listBtnText, { color: Palette.text }]}>≡  List</Text>
+          <Text style={styles.listBtnText}>≡  List</Text>
         </TouchableOpacity>
       )}
 
-      {/* Layer 4: Floating search + filters (always on top) */}
       <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
         <View style={styles.controls} pointerEvents="box-none">
-          <SearchBar 
-            value={filters.query} 
-            onChangeText={handleQueryChange}
-            // Use sage green accent for focus/styling if supported by component
-          />
-          {/* This component needs updating to show Men/Women/Youth chips */}
-          <FilterChips 
-            filters={filters} 
-            onFiltersChange={handleFiltersChange} 
-          />
+          <SearchBar value={filters.query} onChangeText={handleQueryChange} />
+          <FilterChips filters={filters} onFiltersChange={handleFiltersChange} />
         </View>
       </SafeAreaView>
     </View>
@@ -119,40 +103,25 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 20,
-  },
-  controls: {
-    marginTop: Spacing.two,
-    marginHorizontal: Spacing.three,
-    gap: Spacing.two,
-  },
+  screen: { flex: 1 },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 },
+  controls: { marginTop: Spacing.two, marginHorizontal: Spacing.three, gap: Spacing.two },
   listBtn: {
     position: 'absolute',
-    bottom: 120, // Keep away from tab bar
+    bottom: 110,
     right: Spacing.three,
-    paddingHorizontal: 20,
+    paddingHorizontal: 22,
     paddingVertical: 12,
     borderRadius: 30,
+    backgroundColor: Palette.card,
+    borderColor: Palette.accentGreen,
     borderWidth: 2,
-    // Soft shadow for the "cute" look
-    shadowColor: '#8ac28b',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 8,
     zIndex: 15,
   },
-  listBtnText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
+  listBtnText: { fontSize: 16, fontWeight: '700', color: Palette.text },
 });
