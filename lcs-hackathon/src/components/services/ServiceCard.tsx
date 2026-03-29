@@ -61,11 +61,11 @@ export default function ServiceCard({ service, onPress, isSelected = false }: Se
         </View>
 
         <View style={styles.metaRow}>
-          <div style={[styles.badge, { backgroundColor: theme.backgroundElement }]}>
+          <View style={[styles.badge, { backgroundColor: theme.backgroundElement }]}>
             <Text style={[styles.badgeText, { color: theme.textSecondary }]}>
               {SERVICE_TYPE_LABELS[service.type] || service.type}
             </Text>
-          </div>
+          </View>
           
           <Text style={[styles.availability, { color: statusColor }]}>
             {getStatusText()}

@@ -16,6 +16,7 @@ export type PopulationFilter = 'men' | 'women' | 'youth' | 'families';
 export type AccessibilityFilter = 'wheelchair' | 'no_stairs';
 
 export interface Service {
+  predicted_count: number;
   id: string;
   external_id: number | null;  // numeric SHELTER_ID from Toronto Open Data / FastAPI
   name: string;
