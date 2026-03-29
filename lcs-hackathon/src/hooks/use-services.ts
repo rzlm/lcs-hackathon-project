@@ -1,19 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-
 import { expandQuery } from '@/constants/keywords';
 import { fetchShelters } from '@/services/shelters';
 import type { Service, ServiceFilters } from '@/types/service';
 import { haversineDistance } from '@/utils/distance';
-
 import type { LocationCoords } from './use-location';
 
-// Live FastAPI prediction endpoint (optional — app works without it)
 const API_BASE_URL = 'https://lcs2026-fastapi.onrender.com';
 
 export type DataSource = 'supabase' | 'csv' | null;
 
-// Module-level cache — shared across all hook instances so the detail page
-// gets data instantly after the map screen has already fetched it.
 let cachedServices: Service[] | null = null;
 let cachedSource: DataSource = null;
 let fetchPromise: Promise<void> | null = null;
@@ -34,27 +29,39 @@ export function useServices(
   }, []);
 
   useEffect(() => {
-    // Cache already populated — nothing to do
     if (cachedServices !== null) return;
 
-    // Kick off the fetch only once globally
     if (!fetchPromise) {
       fetchPromise = fetchShelters()
         .then(async ({ data, source: src }) => {
-          let merged = data;
+          // 1. Initialize EVERYTHING to 'Unknown' (Score 0.5)
+          let merged = data.map((s) => ({
+            ...s,
+            availability_score: 0.5,
+            availability_label: 'unknown' as const,
+            predicted_count: undefined,
+          }));
+
           try {
+            // 2. Attempt to fetch live ML predictions
             const response = await fetch(`${API_BASE_URL}/forecast?sector=all`);
+            if (!response.ok) throw new Error('API Offline');
+            
             const liveData = await response.json();
+            
             if (Array.isArray(liveData)) {
-              merged = data.map((s) => {
+              merged = merged.map((s) => {
                 const liveInfo = liveData.find(
                   (l: { shelter_id: number | string; predicted_beds: number }) =>
                     s.external_id != null && Number(l.shelter_id) === s.external_id,
                 );
+                
                 if (liveInfo) {
                   const count = liveInfo.predicted_beds;
                   return {
                     ...s,
+                    predicted_count: count,
+                    // Score logic: Green (>2), Orange (>0), Red (0)
                     availability_score: count > 2 ? 1.0 : count > 0 ? 0.4 : 0.1,
                     availability_label: (
                       count > 2 ? 'available' : count > 0 ? 'limited' : 'full'
@@ -64,19 +71,18 @@ export function useServices(
                 return s;
               });
             }
-          } catch {
-            // FastAPI not reachable — use base data as-is
+          } catch (e) {
+            console.log("FastAPI unreachable: Fallback to neutral status.");
           }
+          
           cachedServices = merged;
           cachedSource = src;
         })
         .catch(() => {
-          // leave cache null so next mount retries
           fetchPromise = null;
         });
     }
 
-    // Subscribe to the in-flight fetch
     fetchPromise.then(() => {
       if (mountedRef.current && cachedServices) {
         setAllServices(cachedServices);
@@ -138,11 +144,10 @@ export function useServices(
 
     if (filters.hasAvailability) {
       result = result.filter(
-        (s) => s.availability_score !== null && s.availability_score >= 0.2,
+        (s) => s.availability_score !== null && s.availability_score !== 0.1,
       );
     }
 
-    // Sort by availability first, then distance
     return result.sort((a, b) => {
       const scoreDiff = (b.availability_score ?? 0) - (a.availability_score ?? 0);
       if (scoreDiff !== 0) return scoreDiff;
