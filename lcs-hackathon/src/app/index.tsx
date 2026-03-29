@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,11 +33,14 @@ export default function MapScreen() {
 
   const { services, loading, source } = useServices(filters, location);
   const isWeb = Platform.OS === 'web';
+  const { width } = useWindowDimensions();
+  // Use bottom-sheet layout on native AND on narrow web (mobile browser)
+  const useSheetLayout = !isWeb || width < 768;
 
   const handleMarkerPress = useCallback((service: Service) => {
     setSelectedId(service.id);
-    if (!isWeb) setSheetState('half');
-  }, [isWeb]);
+    if (useSheetLayout) setSheetState('half');
+  }, [useSheetLayout]);
 
   return (
     <View style={styles.screen}>
@@ -84,8 +88,8 @@ export default function MapScreen() {
         </View>
       </SafeAreaView>
 
-      <View style={[styles.content, isWeb && styles.contentDesktop]}>
-        <View style={[styles.mapContainer, isWeb && styles.mapContainerDesktop]}>
+      <View style={[styles.content, !useSheetLayout && styles.contentDesktop]}>
+        <View style={[styles.mapContainer, !useSheetLayout && styles.mapContainerDesktop]}>
           <MapView
             services={services}
             selectedId={selectedId}
@@ -94,7 +98,7 @@ export default function MapScreen() {
           />
         </View>
 
-        {isWeb && (
+        {!useSheetLayout && (
           <View style={styles.desktopListPanel}>
             <View style={styles.desktopListHeader}>
               <Text style={styles.desktopListTitle}>
@@ -134,7 +138,7 @@ export default function MapScreen() {
         )}
       </View>
 
-      {!isWeb && (
+      {useSheetLayout && (
         <ServiceListSheet
           services={services}
           selectedId={selectedId}
@@ -149,7 +153,7 @@ export default function MapScreen() {
         />
       )}
 
-      {!isWeb && sheetState === 'peek' && (
+      {useSheetLayout && sheetState === 'peek' && (
         <TouchableOpacity
           onPress={() => setSheetState('half')}
           style={styles.listBtn}

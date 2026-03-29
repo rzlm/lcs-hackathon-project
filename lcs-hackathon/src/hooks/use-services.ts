@@ -43,10 +43,13 @@ export function useServices(
           }));
 
           try {
-            // 2. Attempt to fetch live ML predictions
-            const response = await fetch(`${API_BASE_URL}/forecast?sector=all`);
+            // 2. Attempt to fetch live ML predictions (5 s timeout — Render free tier cold starts)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const response = await fetch(`${API_BASE_URL}/forecast?sector=all`, { signal: controller.signal });
+            clearTimeout(timeoutId);
             if (!response.ok) throw new Error('API Offline');
-            
+
             const liveData = await response.json();
             
             if (Array.isArray(liveData)) {
