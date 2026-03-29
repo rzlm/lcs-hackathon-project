@@ -1,11 +1,22 @@
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
-import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  Image,
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MapView from '@/components/map/MapView';
 import FilterChips from '@/components/search/FilterChips';
 import SearchBar from '@/components/search/SearchBar';
+import ServiceCard from '@/components/services/ServiceCard';
 import ServiceListSheet, { SheetState } from '@/components/services/ServiceListSheet';
 import { Palette, Spacing } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
@@ -15,16 +26,18 @@ import { EMPTY_FILTERS } from '@/types/service';
 
 export default function MapScreen() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   const { location } = useLocation();
   const [filters, setFilters] = useState<ServiceFilters>(EMPTY_FILTERS);
   const [sheetState, setSheetState] = useState<SheetState>('peek');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const { services, loading, source } = useServices(filters, location);
+  const isDesktopWeb = Platform.OS === 'web' && width >= 960;
 
   const handleMarkerPress = useCallback((service: Service) => {
     setSelectedId(service.id);
-    setSheetState('half');
+    if (!isDesktopWeb) setSheetState('half');
   }, []);
 
   return (
@@ -73,31 +86,72 @@ export default function MapScreen() {
         </View>
       </SafeAreaView>
 
-      {/* Map fills remaining space */}
-      <View style={styles.mapContainer}>
-        <MapView
-          services={services}
-          selectedId={selectedId}
-          onMarkerPress={handleMarkerPress}
-          style={StyleSheet.absoluteFill}
-        />
+      <View style={[styles.content, isDesktopWeb && styles.contentDesktop]}>
+        <View style={[styles.mapContainer, isDesktopWeb && styles.mapContainerDesktop]}>
+          <MapView
+            services={services}
+            selectedId={selectedId}
+            onMarkerPress={handleMarkerPress}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
+
+        {isDesktopWeb && (
+          <View style={styles.desktopListPanel}>
+            <View style={styles.desktopListHeader}>
+              <Text style={styles.desktopListTitle}>
+                {loading
+                  ? 'Finding places...'
+                  : services.length === 0
+                    ? 'No places nearby'
+                    : `${services.length} place${services.length === 1 ? '' : 's'} nearby`}
+              </Text>
+              {!loading && source === 'csv' ? (
+                <Text style={styles.desktopListSubtle}>Offline data</Text>
+              ) : null}
+            </View>
+
+            <FlatList
+              data={services}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <ServiceCard
+                  service={item}
+                  onPress={() => {
+                    setSelectedId(item.id);
+                    router.push(`/service/${item.id}`);
+                  }}
+                  isSelected={item.id === selectedId}
+                />
+              )}
+              ListEmptyComponent={
+                <View style={styles.desktopEmpty}>
+                  <Text style={styles.desktopEmptyText}>No places found nearby.</Text>
+                </View>
+              }
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.desktopListContent}
+            />
+          </View>
+        )}
       </View>
 
-      {/* Bottom sheet */}
-      <ServiceListSheet
-        services={services}
-        selectedId={selectedId}
-        onServicePress={(s) => {
-          setSelectedId(s.id);
-          router.push(`/service/${s.id}`);
-        }}
-        sheetState={sheetState}
-        onSheetStateChange={setSheetState}
-        loading={loading}
-        offlineMode={source === 'csv'}
-      />
+      {!isDesktopWeb && (
+        <ServiceListSheet
+          services={services}
+          selectedId={selectedId}
+          onServicePress={(s) => {
+            setSelectedId(s.id);
+            router.push(`/service/${s.id}`);
+          }}
+          sheetState={sheetState}
+          onSheetStateChange={setSheetState}
+          loading={loading}
+          offlineMode={source === 'csv'}
+        />
+      )}
 
-      {sheetState === 'peek' && (
+      {!isDesktopWeb && sheetState === 'peek' && (
         <TouchableOpacity
           onPress={() => setSheetState('half')}
           style={styles.listBtn}
@@ -173,8 +227,45 @@ const styles = StyleSheet.create({
   },
   loadingText: { color: '#FFF', fontSize: 10, fontWeight: '600' },
 
-  // Map
+  content: { flex: 1 },
+  contentDesktop: { flexDirection: 'row' },
   mapContainer: { flex: 1 },
+  mapContainerDesktop: { minWidth: 0 },
+
+  desktopListPanel: {
+    width: 380,
+    backgroundColor: '#FFF9F0',
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderLeftColor: '#E6DDCF',
+  },
+  desktopListHeader: {
+    backgroundColor: '#FFFDF8',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E6DDCF',
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+  },
+  desktopListTitle: {
+    color: Palette.text,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  desktopListSubtle: {
+    color: Palette.textMuted,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  desktopListContent: { paddingBottom: 24 },
+  desktopEmpty: {
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.five,
+  },
+  desktopEmptyText: {
+    color: Palette.textMuted,
+    fontSize: 15,
+    lineHeight: 22,
+  },
 
   // List button
   listBtn: {
