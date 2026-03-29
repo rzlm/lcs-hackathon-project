@@ -9,9 +9,83 @@ const API_BASE_URL = 'https://lcs2026-fastapi.onrender.com';
 
 export type DataSource = 'supabase' | 'csv' | null;
 
+// Module-level cache — persists across re-renders in the same session
 let cachedServices: Service[] | null = null;
 let cachedSource: DataSource = null;
-let fetchPromise: Promise<void> | null = null;
+let fetchStarted = false;
+
+// Subscribers that want to be notified when the cache updates
+const updateListeners = new Set<() => void>();
+
+function notifyAll() {
+  updateListeners.forEach((fn) => fn());
+}
+
+/**
+ * Phase 1: fetch shelter list from Supabase (fast).
+ * Phase 2: enrich with ML predictions in the background.
+ * Components are notified after each phase so they render immediately
+ * with base data, then update once ML scores arrive.
+ */
+function startFetch() {
+  if (fetchStarted) return;
+  fetchStarted = true;
+
+  fetchShelters()
+    .then(async ({ data, source: src }) => {
+      // --- Phase 1: show shelters right away with neutral scores ---
+      cachedServices = data.map((s) => ({
+        ...s,
+        availability_score: 0.5,
+        availability_label: 'unknown' as const,
+        predicted_count: undefined,
+      }));
+      cachedSource = src;
+      notifyAll();
+
+      // --- Phase 2: enrich with live ML predictions ---
+      try {
+        const controller = new AbortController();
+        // 15 s — gives a warm Render server time to respond (~5 s observed)
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const response = await fetch(`${API_BASE_URL}/forecast?sector=all`, {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error('API offline');
+
+        const liveData: { shelter_id: number | string; predicted_beds: number }[] =
+          await response.json();
+
+        if (Array.isArray(liveData)) {
+          cachedServices = cachedServices!.map((s) => {
+            const hit = liveData.find(
+              (l) => s.external_id != null && Number(l.shelter_id) === s.external_id,
+            );
+            if (!hit) return s;
+            const count = hit.predicted_beds;
+            return {
+              ...s,
+              predicted_count: count,
+              availability_score: count > 2 ? 1.0 : count > 0 ? 0.4 : 0.1,
+              availability_label: (
+                count > 2 ? 'available' : count > 0 ? 'limited' : 'full'
+              ) as Service['availability_label'],
+            };
+          });
+          notifyAll();
+        }
+      } catch {
+        // ML unavailable — shelters already visible with neutral scores
+        console.log('FastAPI unreachable: showing neutral availability.');
+      }
+    })
+    .catch(() => {
+      // Allow retry on next mount
+      fetchStarted = false;
+    });
+}
 
 export function useServices(
   filters: ServiceFilters,
@@ -19,7 +93,7 @@ export function useServices(
 ): { services: Service[]; loading: boolean; error: string | null; source: DataSource } {
   const [allServices, setAllServices] = useState<Service[]>(cachedServices ?? []);
   const [loading, setLoading] = useState(cachedServices === null);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [source, setSource] = useState<DataSource>(cachedSource);
   const mountedRef = useRef(true);
 
@@ -29,75 +103,24 @@ export function useServices(
   }, []);
 
   useEffect(() => {
-    if (cachedServices !== null) return;
+    // Called by notifyAll() after each fetch phase
+    const onCacheUpdate = () => {
+      if (!mountedRef.current || !cachedServices) return;
+      setAllServices([...cachedServices]);
+      setSource(cachedSource);
+      setLoading(false);
+    };
 
-    if (!fetchPromise) {
-      fetchPromise = fetchShelters()
-        .then(async ({ data, source: src }) => {
-          // 1. Initialize EVERYTHING to 'Unknown' (Score 0.5)
-          let merged = data.map((s) => ({
-            ...s,
-            availability_score: 0.5,
-            availability_label: 'unknown' as const,
-            predicted_count: undefined,
-          }));
+    updateListeners.add(onCacheUpdate);
 
-          try {
-            // 2. Attempt to fetch live ML predictions (5 s timeout — Render free tier cold starts)
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            const response = await fetch(`${API_BASE_URL}/forecast?sector=all`, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (!response.ok) throw new Error('API Offline');
-
-            const liveData = await response.json();
-            
-            if (Array.isArray(liveData)) {
-              merged = merged.map((s) => {
-                const liveInfo = liveData.find(
-                  (l: { shelter_id: number | string; predicted_beds: number }) =>
-                    s.external_id != null && Number(l.shelter_id) === s.external_id,
-                );
-                
-                if (liveInfo) {
-                  const count = liveInfo.predicted_beds;
-                  return {
-                    ...s,
-                    predicted_count: count,
-                    // Score logic: Green (>2), Orange (>0), Red (0)
-                    availability_score: count > 2 ? 1.0 : count > 0 ? 0.4 : 0.1,
-                    availability_label: (
-                      count > 2 ? 'available' : count > 0 ? 'limited' : 'full'
-                    ) as Service['availability_label'],
-                  };
-                }
-                return s;
-              });
-            }
-          } catch {
-            console.log("FastAPI unreachable: Fallback to neutral status.");
-          }
-          
-          cachedServices = merged;
-          cachedSource = src;
-        })
-        .catch(() => {
-          fetchPromise = null;
-        });
+    if (cachedServices !== null) {
+      // Cache already populated from a previous mount — use it immediately
+      onCacheUpdate();
+    } else {
+      startFetch();
     }
 
-    fetchPromise.then(() => {
-      if (mountedRef.current && cachedServices) {
-        setAllServices(cachedServices);
-        setSource(cachedSource);
-        setLoading(false);
-      }
-    }).catch((err: Error) => {
-      if (mountedRef.current) {
-        setError(err.message);
-        setLoading(false);
-      }
-    });
+    return () => { updateListeners.delete(onCacheUpdate); };
   }, []);
 
   const services = useMemo(() => {
