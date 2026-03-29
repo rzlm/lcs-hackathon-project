@@ -1,0 +1,668 @@
+[
+  {
+    "id": 8,
+    "name": "The Scott Mission - Kensington location",
+    "address": "346 Spadina Ave.",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 24,
+    "name": "HFS Willowdale Centre",
+    "address": "5800 Yonge St",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 67,
+    "name": "Margaret's 21 Park Rd Respite ",
+    "address": "21 Park Rd",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 22,
+    "name": "CONC Men's Shelter Lansdowne Ave",
+    "address": "973 Lansdowne Ave",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 16,
+    "name": "Good Shepherd Centre",
+    "address": "412 Queen St E",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 29,
+    "name": "SA Gateway",
+    "address": "107 Jarvis St",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 41,
+    "name": "Fife House Denison Ave",
+    "address": "70 Denison Ave",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 82,
+    "name": "TSSS Etobicoke Hotel Program",
+    "address": "Unknown",
+    "sector": "Mixed Adult",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 14,
+    "name": "Dixon Hall Schoolhouse",
+    "address": "349 George St",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 40,
+    "name": "COSTI Hotel Program Dixon",
+    "address": "640 Dixon Rd.",
+    "sector": "Mixed Adult",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 20,
+    "name": "Covenant House - Madison",
+    "address": "158 Madison Ave.",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 100,
+    "name": "TSSS North Hotel Program",
+    "address": "3600 Steeles Ave W",
+    "sector": "Mixed Adult",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 47,
+    "name": "Sojourn House Hotel Program",
+    "address": "165 Grange Ave",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 50,
+    "name": "YWCA 1st Stop Woodlawn ",
+    "address": "80 Woodlawn Ave E",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 59,
+    "name": "TSSS Scarborough Village Residence",
+    "address": "3306 Kingston Rd",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 85,
+    "name": "Friends of Ruby",
+    "address": "Unknown",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 2,
+    "name": "Kingston Residence SWS",
+    "address": "4674 Kingston Rd",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 12,
+    "name": "Native Child & Family - Spadina",
+    "address": "111 Spadina Rd",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 72,
+    "name": "Fred Victor Centre 1A Strachan Ave Respite",
+    "address": "1A Strachan Ave",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 6,
+    "name": "Streets to Homes Assessment and Referral Centre (SHARC)",
+    "address": "129 Peter St",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 44,
+    "name": "Fred Victor Centre Bethlehem United Shelter",
+    "address": "1161 Caledonia Rd",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 3,
+    "name": "TSSS Seaton House",
+    "address": "339 George St",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 78,
+    "name": "YWCA Davenport Shelter",
+    "address": "348 Davenport Road",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 83,
+    "name": "Scarborough Women's Shelter - Milner",
+    "address": "20 Milner Business Ct",
+    "sector": "Women",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 64,
+    "name": "YMCA Sprott House ",
+    "address": "21 Walmer Rd",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 21,
+    "name": "Cornerstone Place",
+    "address": "616 Vaughan Rd",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 81,
+    "name": "YouthLink ",
+    "address": "747 Warden Ave",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 98,
+    "name": "CRC Hotel Program Eglinton",
+    "address": "5515 Eglinton Ave West",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 1,
+    "name": "Na-Me-Res",
+    "address": "14 Vaughan Rd",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 34,
+    "name": "SVDP Amelie House",
+    "address": "126 Pape Ave",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 62,
+    "name": "TSSS Fort York Residence",
+    "address": "38 Bathurst St",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 60,
+    "name": "TSSS Downsview Dells",
+    "address": "1651 Sheppard Ave W",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 48,
+    "name": "Toronto Community Hostel (MUC)",
+    "address": "191 Spadina Rd",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 58,
+    "name": "Fred Victor Centre Transition to Housing Dundas St E",
+    "address": "386 Dundas St E",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 9,
+    "name": "Dixon Hall 354 George St",
+    "address": "354 George St",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 52,
+    "name": "Youth Without Shelter ",
+    "address": "6 Warrendale Ct",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 57,
+    "name": "Kennedy House Youth Shelter",
+    "address": "1076 Pape Ave",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 28,
+    "name": "SA Evangeline Residence",
+    "address": "2808 Dundas St W",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 73,
+    "name": "Etobicoke Hotel Site 1",
+    "address": "66 Norfinch Dr",
+    "sector": "Men",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 45,
+    "name": "Maxwell Meighen Centre",
+    "address": "135 Sherbourne St",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 53,
+    "name": "885 Scarborough Golf Club Road",
+    "address": "885 Scarborough Golf Club Road",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 11,
+    "name": "Etobicoke Hotel Site 1",
+    "address": "66 Norfinch Dr",
+    "sector": "Women",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 38,
+    "name": "SVDP Elisa House",
+    "address": "60 Newcastle St",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 66,
+    "name": "St. Felix Centre 69 Fraser Ave. Respite ",
+    "address": "69 Fraser Ave",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 13,
+    "name": "Horizons for Youth",
+    "address": "422 Gilbert Ave",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 77,
+    "name": "SA Islington Seniors' Shelter",
+    "address": "2671 Islington Ave",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 54,
+    "name": "Robertson House",
+    "address": "291 Sherbourne St",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 80,
+    "name": "HFS 195 Princes' Blvd ",
+    "address": "195 Princes' Blvd",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 65,
+    "name": "Sistering",
+    "address": "962 Bloor St W",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 37,
+    "name": "SVDP Mary's Home",
+    "address": "70 Gerrard St E",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 94,
+    "name": "Progress Avenue Shelter",
+    "address": "705 Progress Ave",
+    "sector": "Men",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 4,
+    "name": "TSSS Downtown Hotel Program",
+    "address": "77 Ryerson Ave",
+    "sector": "Mixed Adult",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 7,
+    "name": "Red Door Family Shelter",
+    "address": "189B Booth Ave",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 68,
+    "name": "HFS Kennedy Rd Women's Shelter",
+    "address": "702 Kennedy Rd",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 30,
+    "name": "St. Simon's Clubbe House",
+    "address": "556 Sherbourne St",
+    "sector": "Men",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 33,
+    "name": "Turning Point Youth Services ",
+    "address": "95 Wellesley St E",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 36,
+    "name": "Street Haven",
+    "address": "87 Pembroke St",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 18,
+    "name": "Scarborough Hotel Program 1",
+    "address": "4584 Kingston Rd",
+    "sector": "Youth",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 39,
+    "name": "Christie Refugee Welcome Centre",
+    "address": "43 Christie St",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 42,
+    "name": "Fred Victor Centre Fatima House",
+    "address": "1059 College Street",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 71,
+    "name": "Warden Woods 705 Progress Ave Respite ",
+    "address": "705 Progress Ave",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 19,
+    "name": "Eva's Phoenix",
+    "address": "60 Brant St",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 5,
+    "name": "Wagner Green YMCA",
+    "address": "7 Vanauley St",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 99,
+    "name": "Romero-Edna Lane House",
+    "address": "2387 Dundas Street West",
+    "sector": "Families",
+    "capacity_type": "Room Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 31,
+    "name": "SVDP St. Clare's Residence",
+    "address": "3410 Bayview Ave",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 27,
+    "name": "Nellie's Women's Shelter",
+    "address": "Unknown",
+    "sector": "Women",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 95,
+    "name": "Dixon Hall - Warming Centre North York",
+    "address": "12 Holmes Ave",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 101,
+    "name": "Centre for Refugee Children - Anchor House",
+    "address": "Unknown",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 17,
+    "name": "Eva's Satellite",
+    "address": "25 Canterbury Pl",
+    "sector": "Youth",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 103,
+    "name": "213 Carlton Street",
+    "address": "213 Carlton Street",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 104,
+    "name": "La Passerelle I.D.E. L'Agapanthe",
+    "address": "179 Gerrard St. East",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 105,
+    "name": "Warden Woods - Kingston Road Shelter",
+    "address": "4584 Kingston Road",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 107,
+    "name": "St. Felix Ctr - Adelaide Shelter",
+    "address": "629 Adelaide St W",
+    "sector": "Mixed Adult",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  },
+  {
+    "id": 102,
+    "name": "Matthew House - Dundas House",
+    "address": "981 Dundas St W",
+    "sector": "Families",
+    "capacity_type": "Bed Based Capacity",
+    "lat": 0.0,
+    "lng": 0.0
+  }
+]

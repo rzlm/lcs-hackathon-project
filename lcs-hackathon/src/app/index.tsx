@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,10 +7,9 @@ import MapView from '@/components/map/MapView';
 import FilterChips from '@/components/search/FilterChips';
 import SearchBar from '@/components/search/SearchBar';
 import ServiceListSheet, { SheetState } from '@/components/services/ServiceListSheet';
-import { Spacing } from '@/constants/theme';
+import { Spacing, Palette } from '@/constants/theme';
 import { useLocation } from '@/hooks/use-location';
 import { useServices } from '@/hooks/use-services';
-import { useTheme } from '@/hooks/use-theme';
 import type { Service, ServiceFilters } from '@/types/service';
 import { EMPTY_FILTERS } from '@/types/service';
 
@@ -25,14 +25,16 @@ function hasActiveFilters(f: ServiceFilters): boolean {
 }
 
 export default function MapScreen() {
-  const theme = useTheme();
+  const router = useRouter();
   const { location } = useLocation();
 
+  // 1. Updated Filters to match actual Data (Women, Youth, Bed Based, etc.)
   const [filters, setFilters] = useState<ServiceFilters>(EMPTY_FILTERS);
   const [sheetState, setSheetState] = useState<SheetState>('peek');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { services } = useServices(filters, location);
+  // 2. This hook now triggers the FastAPI fetch whenever 'filters' changes
+  const { services, loading } = useServices(filters, location);
 
   const handleFiltersChange = useCallback(
     (next: ServiceFilters) => {
@@ -58,12 +60,12 @@ export default function MapScreen() {
 
   const handleServicePress = useCallback((service: Service) => {
     setSelectedId(service.id);
-    // TODO: router.push(`/service/${service.id}`) once detail screen exists
-  }, []);
+    router.push(`/service/${service.id}`);
+  }, [router, setSelectedId]);
 
   return (
-    <View style={styles.screen}>
-      {/* Layer 1: Map (background) */}
+    <View style={[styles.screen, { backgroundColor: Palette.background }]}>
+      {/* Layer 1: Map (background) - No changes to layout */}
       <MapView
         services={services}
         selectedId={selectedId}
@@ -71,7 +73,7 @@ export default function MapScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Layer 2: Sliding service list sheet */}
+      {/* Layer 2: Sliding service list sheet - Keep original behavior */}
       <ServiceListSheet
         services={services}
         selectedId={selectedId}
@@ -80,27 +82,36 @@ export default function MapScreen() {
         onSheetStateChange={setSheetState}
       />
 
-      {/* Layer 3: Floating "List" button (only when sheet is peeked) */}
+      {/* Layer 3: Floating "List" button (Sage Green/Beige Aesthetic) */}
       {sheetState === 'peek' && (
         <TouchableOpacity
           onPress={() => setSheetState('half')}
           style={[
             styles.listBtn,
             {
-              backgroundColor: theme.background,
-              borderColor: theme.backgroundElement,
+              backgroundColor: Palette.card, 
+              borderColor: Palette.accentGreen,
             },
           ]}
           activeOpacity={0.85}>
-          <Text style={[styles.listBtnText, { color: theme.text }]}>≡  List</Text>
+          {/* Using text instead of black icons for a softer look */}
+          <Text style={[styles.listBtnText, { color: Palette.text }]}>≡  List</Text>
         </TouchableOpacity>
       )}
 
       {/* Layer 4: Floating search + filters (always on top) */}
       <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
         <View style={styles.controls} pointerEvents="box-none">
-          <SearchBar value={filters.query} onChangeText={handleQueryChange} />
-          <FilterChips filters={filters} onFiltersChange={handleFiltersChange} />
+          <SearchBar 
+            value={filters.query} 
+            onChangeText={handleQueryChange}
+            // Use sage green accent for focus/styling if supported by component
+          />
+          {/* This component needs updating to show Men/Women/Youth chips */}
+          <FilterChips 
+            filters={filters} 
+            onFiltersChange={handleFiltersChange} 
+          />
         </View>
       </SafeAreaView>
     </View>
@@ -125,21 +136,23 @@ const styles = StyleSheet.create({
   },
   listBtn: {
     position: 'absolute',
-    bottom: 120,
+    bottom: 120, // Keep away from tab bar
     right: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: 10,
-    borderRadius: 24,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 30,
+    borderWidth: 2,
+    // Soft shadow for the "cute" look
+    shadowColor: '#8ac28b',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 8,
     zIndex: 15,
   },
   listBtnText: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
